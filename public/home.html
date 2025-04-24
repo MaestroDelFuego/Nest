@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Movie Library</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1C1813;
+      color: #fff;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      font-size: 2em;
+      font-weight: bold;
+      background-color: #2b241c;
+    }
+
+    .search-container {
+      padding: 20px;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      padding: 10px 15px;
+      width: 300px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background-color: #2b241c;
+      border-radius: 12px;
+      overflow: hidden;
+      text-align: center;
+      transition: transform 0.3s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .card h3 {
+      margin: 10px 0;
+      font-size: 1.1em;
+    }
+
+    .card button {
+      margin-bottom: 15px;
+      padding: 8px 16px;
+      background-color: #f9a825;
+      color: #1C1813;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .card button:hover {
+      background-color: #ffc107;
+    }
+  </style>
+</head>
+<body>
+  <header>Nest Media Library</header>
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search movies...">
+  </div>
+  <div class="movie-grid" id="movieGrid"></div>
+
+  <script>
+    const movieGrid = document.getElementById('movieGrid');
+    const searchInput = document.getElementById('searchInput');
+
+    let allMovies = [];
+
+    async function loadMovies() {
+      try {
+        const res = await fetch('/movies-list');
+        const movies = await res.json();
+        allMovies = movies;
+        displayMovies(movies);
+      } catch (error) {
+        console.error('Failed to fetch movies:', error);
+        movieGrid.innerHTML = '<p style="text-align:center;">Unable to load movies.</p>';
+      }
+    }
+
+    function displayMovies(movies) {
+      movieGrid.innerHTML = movies.map(movie => `
+        <div class="card">
+          <img src="${movie.thumbnail || '/movies/placeholder.png'}" alt="${movie.title} Thumbnail">
+          <h3>${movie.title}</h3>
+          <button onclick="playMovie('${movie.video}')">Play</button>
+        </div>
+      `).join('');
+    }
+
+    function playMovie(url) {
+      window.open(url, '_blank');
+    }
+
+    searchInput.addEventListener('input', () => {
+      const searchTerm = searchInput.value.toLowerCase();
+      const filtered = allMovies.filter(m => m.title.toLowerCase().includes(searchTerm));
+      displayMovies(filtered);
+    });
+
+    loadMovies();
+  </script>
+</body>
+</html>
